@@ -11,10 +11,10 @@
             "program": "${workspaceFolder}/aoc22/target/debug/aoc22",
             "args": [],
             "cwd": "${workspaceFolder}",
-            "env": {
-                "RUST_BACKTRACE":"1",
-                "PATH": "${PATH}:${workspaceFolder}/input"
-            }
+            // "env": {
+            //     "RUST_BACKTRACE":"1",
+            //     "PATH": "${PATH}:${workspaceFolder}/input"
+            // }
         }
     ]
 }
