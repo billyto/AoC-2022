@@ -44,15 +44,12 @@ pub fn day2() {
     for g in games {
 
         let score = game_p2(g);
-      //  println!("points per game {} ", score);
-
         scores.push(score);
-
     }
 
     let total_score: usize = scores.iter().sum();
 
-    print!("Total score is {}",total_score); //8933
+    println!("Total score is {}",total_score); //8933
 
 }
 
