@@ -1,5 +1,7 @@
 use std::fs;
 use regex::Regex;
+use std::str::FromStr;
+use itertools::{Itertools, Unique};
 
 extern crate array_tool;
 
@@ -216,5 +218,146 @@ pub fn day3() {
     println!("sum of badges is {}", suma_badges); 
         
 
+
+}
+
+
+pub fn day4(){
+    let contents = fs::read_to_string("input/04-input").expect("problem with the file");
+
+    let sections: Vec<&str> = contents.split("\n").collect();
+
+    let mut overlaps: u32 = 0;
+    let mut patial_overlap: u32 = 0; 
+
+    for section in sections {
+
+        println!("working on {section}");
+        let assigns: Vec<&str> = section.split(",").collect();
+
+        let mut ps: Vec<std::ops::Range<i32>> = Vec::new();
+
+        for ass in assigns{
+
+            let mut elf_assign: Vec<&str> = ass.split("-").collect();
+            let start_s = elf_assign.pop().unwrap();
+            let start: i32 =  FromStr::from_str(start_s).unwrap();
+            let end_s = elf_assign.pop().unwrap();
+            let end = FromStr::from_str(end_s).unwrap();
+
+            let r1 = std::ops::Range { start: end, end: start+1 }; //yolo
+
+            ps.push(r1);
+        }
+        //we have to ranges
+        let r1 = ps.pop().unwrap();
+        let r2 = ps.pop().unwrap();
+
+        let r1_end = r1.end - 1;
+        let r2_end = r2.end - 1;
+
+        if (r1.contains(&r2.start) && r1.contains(&r2_end) ) || 
+            r2.contains(&r1.start) && r2.contains(&r1_end){
+                overlaps = overlaps +1;
+        } 
+
+        if (r1.contains(&r2.start) || r1.contains(&r2_end) ) || 
+        r2.contains(&r1.start) || r2.contains(&r1_end){
+            patial_overlap = patial_overlap +1;
+    }  
+
+    }
+    println!("overlaps {}", overlaps);
+    println!("partial overlaps {}", patial_overlap);
+        
+}
+
+pub fn day5() {
+
+    let contents = fs::read_to_string("input/05-input").expect("problem with the file");
+
+    let re = Regex::new(r"\n{2,}").unwrap();
+    let loads= re.split(&contents).collect::<Vec<&str>>();
+
+    let num_stacks = loads.first().unwrap().trim_end().chars().last().unwrap().to_digit(10).unwrap();
+
+    println!("we have {} stacks", num_stacks);
+
+    //create num_Stacks
+
+    let mut stacks: Vec<Vec<char>> = std::iter::repeat(Vec::new()).take(num_stacks as usize).collect::<Vec<Vec<char>>>();
+    let mut initial_load = loads.first().unwrap().split("\n").collect::<Vec<&str>>();
+    let instructions = loads.last().unwrap().split("\n").collect::<Vec<&str>>();
+
+    initial_load.pop();
+    initial_load.reverse();
+    //build the initial stacks
+    for line in initial_load {
+
+        let mut i = 0;
+        let mut j = 1;
+
+        let load: char = line.chars().nth(j).unwrap_or_default();
+        if load.is_ascii_alphabetic(){
+            stacks[0].push(load);
+        }
+
+        while j < line.len() {
+            i = i +1;  // stacks index
+            j = j+ 4;  // jumper for charsi
+
+            let load: char = line.chars().nth(j).unwrap_or_default();
+            if load.is_ascii_alphabetic(){
+                stacks[i].push(load);
+            } 
+        }
+    }
+
+    //move things around
+    // move 1 from 2 to 1
+    let inst_re = Regex::new(r"move (\d+) from (\d+) to (\d+)").unwrap(); 
+    for inst in instructions {
+
+        let mut count: usize = 0;
+        let mut from: usize = 0;
+        let mut to: usize = 0;
+        for cap in inst_re.captures_iter(inst){
+            count =  FromStr::from_str(&cap[1]).unwrap() ;
+            from = FromStr::from_str(&cap[2]).unwrap();
+            to= FromStr::from_str(&cap[3]).unwrap();
+
+        }
+
+       
+        let cut: usize = stacks[from-1].len() - count;
+        let mut movers = stacks[from-1].split_off(cut);
+        // movers.reverse();  //flip this one off for part 2
+        stacks[to-1].append(&mut movers);
+
+    }
+
+    let message:String = stacks.iter().map(|s| s.last().unwrap()).collect();   
+    println!("{}",message);
+    
+
+}
+
+pub fn day6(){
+    let contents = fs::read_to_string("input/06-input").expect("problem with the file");
+    let jump: usize = 14; // flip to 4 for part 1 
+    let mut start: usize = 0;
+    let mut end: usize = jump;
+    while end < contents.len(){
+        start = start +1;
+        end = start + jump;
+        let bloc = contents.get(start..end).unwrap();
+        let bloc_uniques = bloc.to_string().chars().unique().collect_vec().len();
+        println!("bloc {} uniques {}",bloc, bloc_uniques);
+
+        if bloc.len() == bloc_uniques {
+            println!("found sequence after {} characters", end);
+            break;
+        } 
+    }
 
 }
