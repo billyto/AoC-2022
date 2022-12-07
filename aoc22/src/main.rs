@@ -1,11 +1,11 @@
 use std::fs;
-use indextree::Arena;
+use indextree::{Arena, NodeEdge, NodeId};
 use std::str::FromStr;
 use std::fmt;
 
 // pub mod aoc;
 
-
+#[derive(Copy, Clone)]
 struct NodeInfo<'a> {
     name: &'a str, 
     size: usize}
@@ -15,10 +15,16 @@ impl fmt::Display for NodeInfo<'_> {
         write!(f, "node: {}, size: {}", self.name, self.size)
     }
 }
+impl PartialEq for NodeInfo<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.name.eq(other.name) && self.size == other.size
+    }
+}
+
 
 fn main() {
 
-    let contents = fs::read_to_string("input/07-sample").expect("problem with the file");
+    let contents = fs::read_to_string("input/07-input").expect("problem with the file");
     let instructions: Vec<&str> = contents.split("\n").collect();
 
     let arena = &mut Arena::new();    
@@ -59,11 +65,51 @@ fn main() {
             let file = arena.new_node(NodeInfo{name: file_name, size: file_size});
             pointer.append(file, arena);
 
+
+
+        let oldies = pointer.ancestors(&arena).collect::<Vec<NodeId>>();
+
+        for ancestor in oldies {
+
+            let node_info = arena.get_mut(ancestor).unwrap().get_mut();
+            // println!("parent name is {}", node_info.name);
+            node_info.size = node_info.size + file_size;
+
+}
+
         }
 
 
     }
     println!("dir tree is\n {}", root.debug_pretty_print(&arena));
+
+    let traverser = root.traverse(arena);
+    
+    let mut dirs: Vec<NodeInfo> = Vec::new();
+    // let smallests: Vec<usize> = Vec::new();
+    for node_e in traverser {
+        let n =  match node_e {
+            NodeEdge::Start(node_info) => node_info,
+            NodeEdge::End(node_info) => node_info,
+        };
+        let node_info = arena.get(n).unwrap().get();
+        let node_name = node_info.name;
+        let node_size = node_info.size;
+        
+
+        if !dirs.contains(node_info) && n.children(arena).count() > 0 && node_size <=100000{
+            println!("adding {}", node_info);
+            dirs.push(*node_info);
+        }
+    }
+
+    let all_smalls = dirs.iter()
+                .fold(0,|accum, node| accum + node.size);
+
+
+
+    println!("Big number is {}", all_smalls);
+
 
 }
 
