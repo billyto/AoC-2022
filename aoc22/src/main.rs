@@ -97,7 +97,7 @@ fn main() {
         let node_size = node_info.size;
         
 
-        if !dirs.contains(node_info) && n.children(arena).count() > 0 && node_size <=100000{
+        if !dirs.contains(node_info) && n.children(arena).count() > 0 { // &&  node_size <=100000{  // enable for part 1
             println!("adding {}", node_info);
             dirs.push(*node_info);
         }
@@ -107,8 +107,21 @@ fn main() {
                 .fold(0,|accum, node| accum + node.size);
 
 
-
     println!("Big number is {}", all_smalls);
+
+    let space_taken = arena.get(root).unwrap().get().size;
+    let free_space: usize = 70000000 - space_taken;
+    let space_needed: usize = 30000000 - free_space;
+    println!("Free space {}, space needed {}", free_space, space_needed); 
+
+
+    let candidates = dirs.iter().filter(|node| node.size > space_needed);
+
+    let min = candidates.min_by(|x,t|  x.size.cmp(&t.size)).unwrap(); 
+    println!("best option is {}", min);
+
+
+
 
 
 }
