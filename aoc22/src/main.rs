@@ -3,8 +3,6 @@ use indextree::{Arena, NodeEdge, NodeId};
 use std::str::FromStr;
 use std::fmt;
 
-// pub mod aoc;
-
 #[derive(Copy, Clone)]
 struct NodeInfo<'a> {
     name: &'a str, 
@@ -21,17 +19,13 @@ impl PartialEq for NodeInfo<'_> {
     }
 }
 
-
 fn main() {
 
     let contents = fs::read_to_string("input/07-input").expect("problem with the file");
     let instructions: Vec<&str> = contents.split("\n").collect();
-
     let arena = &mut Arena::new();    
-    
     let mut pointer = arena.new_node(NodeInfo{name:"/",size:0}); // root
     let root = pointer.clone();
-
 
     for inst in instructions {
 
@@ -47,7 +41,6 @@ fn main() {
                 _ => { // got to dir_dest
                     pointer = pointer.children(&arena).filter(|child| 
                         arena.get(*child).unwrap().get().name.eq(dir_dest)).next().unwrap();
-                   
                 }, 
             }
 
@@ -65,28 +58,17 @@ fn main() {
             let file = arena.new_node(NodeInfo{name: file_name, size: file_size});
             pointer.append(file, arena);
 
-
-
-        let oldies = pointer.ancestors(&arena).collect::<Vec<NodeId>>();
-
-        for ancestor in oldies {
-
-            let node_info = arena.get_mut(ancestor).unwrap().get_mut();
-            // println!("parent name is {}", node_info.name);
-            node_info.size = node_info.size + file_size;
-
-}
-
+            let oldies = pointer.ancestors(&arena).collect::<Vec<NodeId>>();
+            for ancestor in oldies {
+                let node_info = arena.get_mut(ancestor).unwrap().get_mut();
+                node_info.size = node_info.size + file_size;
+            }
         }
-
-
     }
     println!("dir tree is\n {}", root.debug_pretty_print(&arena));
-
     let traverser = root.traverse(arena);
     
     let mut dirs: Vec<NodeInfo> = Vec::new();
-    // let smallests: Vec<usize> = Vec::new();
     for node_e in traverser {
         let n =  match node_e {
             NodeEdge::Start(node_info) => node_info,
@@ -96,7 +78,6 @@ fn main() {
         let node_name = node_info.name;
         let node_size = node_info.size;
         
-
         if !dirs.contains(node_info) && n.children(arena).count() > 0 { // &&  node_size <=100000{  // enable for part 1
             println!("adding {}", node_info);
             dirs.push(*node_info);
@@ -106,7 +87,6 @@ fn main() {
     let all_smalls = dirs.iter()
                 .fold(0,|accum, node| accum + node.size);
 
-
     println!("Big number is {}", all_smalls);
 
     let space_taken = arena.get(root).unwrap().get().size;
@@ -114,16 +94,7 @@ fn main() {
     let space_needed: usize = 30000000 - free_space;
     println!("Free space {}, space needed {}", free_space, space_needed); 
 
-
     let candidates = dirs.iter().filter(|node| node.size > space_needed);
-
     let min = candidates.min_by(|x,t|  x.size.cmp(&t.size)).unwrap(); 
     println!("best option is {}", min);
-
-
-
-
-
 }
-
-
