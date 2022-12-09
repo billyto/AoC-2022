@@ -25,8 +25,8 @@ impl FromStr for Direction{
     }
 }
 
-#[derive(PartialEq, Eq, Hash, Debug)]
-struct Position{x: usize, y:usize}
+#[derive(PartialEq, Eq, Hash, Debug, Clone)]
+struct Position{x: isize, y:isize}
 
 struct Move {
     dir: Direction, 
@@ -49,18 +49,95 @@ impl FromStr for Move{
 
 fn main() {
 
-    let contents = fs::read_to_string("input/08-input").expect("problem with the file");    
+    let contents = fs::read_to_string("input/09-sample").expect("problem with the file");    
 
     let moves = contents.lines()
                 .map(|line| Move::from_str(line).unwrap() );
 
     let mut visited:HashSet<Position> = HashSet::new();
 
-    visited.insert(Position{x:0,y:0});
-    
+    let mut tail_p = Position{x:0,y:0};
+    let mut head_p= Position{x:0, y:0}; 
+
+    visited.insert(tail_p.clone());
+
+    for m in moves {
 
 
+        match m.dir {
+            
+            Direction::Up => {
+                                println!("Going Up {}",m.dist);
+                                // let init_y = tail_p.y;
+                                // head_p.y = head_p.y + m.dist;
+                                // tail_p.y = head_p.y - 1; // I'm right below
 
+                                // for n in init_y as isize.. head_p.y as isize {
+                                //     visited.insert(Position{x:tail_p.x, y: n as usize});
+                                // }
+
+                                let init_h_y = head_p.y;
+                                head_p.y = head_p.y + m.dist;
+                                tail_p.y = head_p.y - 1; // I'm right below
+                                for n in (init_h_y + 1) .. tail_p.y { // from the first place where head will move to the tail.
+                                    visited.insert(Position{x:tail_p.x,y:n as usize});
+                                }
+
+                            },
+            Direction::Down => {
+                                println!("Going Down {}",m.dist);
+                                // let init_y = tail_p.y;
+                                // head_p.y = head_p.y - m.dist;
+                                // tail_p.y = head_p.y + 1; //I'm right above
+                                
+                                // for n in head_p.y as isize..tail_p.y as isize {
+                                //     visited.insert(Position{x:tail_p.x, y: n as usize});
+                                // }
+                                let init_h_y = head_p.y; 
+                                head_p.y = head_p.y - m.dist;
+                                tail_p.y = head_p.y + 1; //I'm right above
+                                for n in (init_h_y -1) .. tail_p.y {
+                                    visited.insert(Position{x:tail_p.x,y:n as usize});
+                                }
+
+
+                            },
+            Direction::Left => {
+                                println!("Going Left {}",m.dist);
+                                // head_p.x = head_p.x - m.dist;
+                                // tail_p.x = head_p.x + 1;
+                                
+                                // for n in head_p.x as isize..tail_p.x as isize {
+                                //     visited.insert(Position{x:n as usize, y: tail_p.y as usize});
+                                // }
+                                let init_h_x = head_p.x;
+                                head_p.x = head_p.x - m.dist;
+                                tail_p.x = head_p.x + 1;
+                                for n in (init_h_x-1) .. tail_p.x {
+                                    visited.insert(Position{x:n as usize,y:tail_p.y as usize});
+                                }
+
+                            },
+            Direction::Right => {
+                                println!("Going Right {}",m.dist);
+                                // let init_x = tail_p.x;
+                                // head_p.x = head_p.x + m.dist;
+                                // tail_p.x = head_p.x - 1; 
+
+                                // for n in  tail_p.x as isize.. head_p.x as isize{
+                                //     visited.insert(Position{x:n as usize,y:tail_p.y});
+                                // }
+                                let init_h_x = head_p.x;
+                                head_p.x = head_p.x - m.dist;
+                                tail_p.x = head_p.x + 1;                             
+                                for n in (init_h_x+1) .. tail_p.x{
+                                    visited.insert(Position{x:n,y:tail_p.y});
+                                }
+                            },
+        }
+    }
+
+    println!("Positions covered by tail {}", visited.len());
 
 
 }
